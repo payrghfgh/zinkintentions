@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | ZinkIntentions</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .admin-section { background: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .admin-form-group { margin-bottom: 1.5rem; }
+        .admin-form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+        .admin-form-group input, .admin-form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+        .artwork-edit-card { border: 1px solid #eee; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; position: relative; }
+        .remove-btn { position: absolute; top: 1rem; right: 1rem; color: #ff4d4d; cursor: pointer; }
+        .passcode-section { background: #fffde7; border: 1px solid #fbc02d; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+    </style>
+</head>
+<body style="padding-top: 2rem;">
+    <div class="container">
+        <h1 class="mb-3">ZinkIntentions Content Manager</h1>
+        
+        <div class="passcode-section">
+            <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Security Authorization</h2>
+            <div class="admin-form-group" style="margin-bottom: 0;">
+                <label>Secret Admin Passcode</label>
+                <input type="password" id="adminSecret" placeholder="Enter passcode to enable saving">
+            </div>
+        </div>
+
+        <!-- General Info -->
+        <div class="admin-section">
+            <h2>General Information</h2>
+            <div class="admin-form-group">
+                <label>Brand Name</label>
+                <input type="text" id="brandName">
+            </div>
+            <div class="admin-form-group">
+                <label>WhatsApp Number</label>
+                <input type="text" id="whatsappNumber">
+            </div>
+            <div class="admin-form-group">
+                <label>Instagram URL</label>
+                <input type="text" id="instagramUrl">
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="admin-section">
+            <h2>About Section</h2>
+            <div class="admin-form-group">
+                <label>Subtitle</label>
+                <input type="text" id="aboutSubtitle">
+            </div>
+            <div class="admin-form-group">
+                <label>Quote</label>
+                <input type="text" id="aboutQuote">
+            </div>
+            <div class="admin-form-group">
+                <label>Description</label>
+                <textarea id="aboutDesc1" rows="3"></textarea>
+            </div>
+            <div class="admin-form-group">
+                <label>About Image</label>
+                <input type="file" accept="image/*" onchange="window.handleSingleImageUpload(event, 'aboutImage')">
+                <input type="hidden" id="aboutImage">
+                <img id="aboutImagePreview" src="" style="max-width: 150px; margin-top: 0.5rem; display: none; border-radius: 4px;">
+            </div>
+        </div>
+
+        <!-- Artworks -->
+        <div class="admin-section">
+            <h2>Artworks</h2>
+            <div id="artworks-list"></div>
+            <button class="btn btn-outline" onclick="window.addArtwork()" style="width: 100%;">+ Add New Artwork</button>
+        </div>
+
+        <div style="text-align: center; margin: 4rem 0;">
+            <button class="btn btn-primary" id="save-btn" onclick="window.saveToFirestore()">Save Changes to Live Site</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSiteConfig, saveSiteConfig } from './js/firebase-config.js';
+        import localConfig from './js/config.js';
+
+        let siteConfig = localConfig;
+
+        async function initAdmin() {
+            const liveConfig = await getSiteConfig();
+            if (liveConfig) siteConfig = liveConfig;
+
+            document.getElementById('brandName').value = siteConfig.brandName || '';
+            document.getElementById('whatsappNumber').value = siteConfig.whatsappNumber || '';
+            document.getElementById('instagramUrl').value = siteConfig.instagramUrl || '';
+            
+            if(siteConfig.about) {
+                document.getElementById('aboutSubtitle').value = siteConfig.about.subtitle || '';
+                document.getElementById('aboutQuote').value = siteConfig.about.quote || '';
+                document.getElementById('aboutDesc1').value = siteConfig.about.description1 || '';
+                document.getElementById('aboutImage').value = siteConfig.about.imageUrl || '';
+                if (siteConfig.about.imageUrl) {
+                    const preview = document.getElementById('aboutImagePreview');
+                    preview.src = siteConfig.about.imageUrl;
+                    preview.style.display = 'block';
+                }
+            }
+            window.renderArtworksEdit();
+        }
+
+        window.renderArtworksEdit = function() {
+            const list = document.getElementById('artworks-list');
+            list.innerHTML = '';
+            (siteConfig.artworks || []).forEach((art, index) => {
+                const card = document.createElement('div');
+                card.className = 'artwork-edit-card';
+                card.innerHTML = `
+                    <div class="remove-btn" onclick="window.removeArtwork(${index})">Remove</div>
+                    <div class="admin-form-group">
+                        <label>Title</label>
+                        <input type="text" value="${art.title}" onchange="window.updateArt(${index}, 'title', this.value)">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Price</label>
+                        <input type="text" value="${art.price}" onchange="window.updateArt(${index}, 'price', this.value)">
+                    </div>
+                    <div class="admin-form-group">
+                        <label>Image</label>
+                        <input type="file" accept="image/*" onchange="window.handleArtworkImageUpload(event, ${index})">
+                        <img src="${art.imageUrl}" style="max-width: 150px; margin-top: 0.5rem; display: ${art.imageUrl ? 'block' : 'none'}; border-radius: 4px;">
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        };
+
+        window.updateArt = (index, field, value) => { siteConfig.artworks[index][field] = value; };
+        window.removeArtwork = (index) => { siteConfig.artworks.splice(index, 1); window.renderArtworksEdit(); };
+        window.addArtwork = () => { 
+            if(!siteConfig.artworks) siteConfig.artworks = [];
+            siteConfig.artworks.push({ id: Date.now(), title: "New Artwork", price: "₹0", imageUrl: "" });
+            window.renderArtworksEdit(); 
+        };
+
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 800;
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', 0.6));
+                }
+            };
+        }
+
+        window.handleSingleImageUpload = (e, id) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            compressImage(file, (base64) => {
+                document.getElementById(id).value = base64;
+                siteConfig.about.imageUrl = base64;
+                const preview = document.getElementById(id + 'Preview');
+                preview.src = base64; preview.style.display = 'block';
+            });
+        };
+
+        window.handleArtworkImageUpload = (e, index) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            compressImage(file, (base64) => {
+                siteConfig.artworks[index].imageUrl = base64;
+                window.renderArtworksEdit();
+            });
+        };
+
+        window.saveToFirestore = async function() {
+            const passcode = document.getElementById('adminSecret').value;
+            if (!passcode) { alert('Please enter the secret passcode first!'); return; }
+
+            const btn = document.getElementById('save-btn');
+            btn.textContent = "Verifying & Saving...";
+            btn.disabled = true;
+
+            try {
+                siteConfig.brandName = document.getElementById('brandName').value;
+                siteConfig.whatsappNumber = document.getElementById('whatsappNumber').value;
+                siteConfig.instagramUrl = document.getElementById('instagramUrl').value;
+                if(!siteConfig.about) siteConfig.about = {};
+                siteConfig.about.subtitle = document.getElementById('aboutSubtitle').value;
+                siteConfig.about.quote = document.getElementById('aboutQuote').value;
+                siteConfig.about.description1 = document.getElementById('aboutDesc1').value;
+
+                // Add the passcode to the data being sent so the rule can verify it
+                siteConfig.adminSecret = passcode;
+
+                const success = await saveSiteConfig(siteConfig);
+                if (success) {
+                    alert('Successfully saved! Your changes are now live.');
+                } else {
+                    alert('Permission Denied. Did you enter the correct passcode? (Or you might be exceeding the 1MB limit).');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred.');
+            }
+
+            btn.textContent = "Save Changes to Live Site";
+            btn.disabled = false;
+        };
+
+        initAdmin();
+    </script>
+</body>
+</html>
