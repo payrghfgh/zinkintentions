@@ -3,219 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | ZinkIntentions</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Admin Panel | Zinkintentions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .admin-section { background: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .admin-form-group { margin-bottom: 1.5rem; }
-        .admin-form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
-        .admin-form-group input, .admin-form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
-        .artwork-edit-card { border: 1px solid #eee; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; position: relative; }
-        .remove-btn { position: absolute; top: 1rem; right: 1rem; color: #ff4d4d; cursor: pointer; }
-        .passcode-section { background: #fffde7; border: 1px solid #fbc02d; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; }
+        :root { --bg:#f0f2f5; --card:#fff; --primary:#1a1a2e; --accent:#e94560; --gold:#d4af37; --text:#2d3748; --muted:#718096; --border:#e2e8f0; --success:#38a169; --danger:#e53e3e; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        /* HEADER */
+        .adm-header{background:linear-gradient(135deg,var(--primary) 0%,#16213e 100%);color:#fff;padding:0}
+        .adm-header-inner{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between}
+        .adm-logo{font-size:1.4rem;font-weight:700;letter-spacing:-0.5px}
+        .adm-logo span{color:var(--gold)}
+        .adm-save-btn{background:var(--gold);color:#1a1a2e;border:none;padding:.75rem 2rem;border-radius:50px;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;transition:all .2s}
+        .adm-save-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(212,175,55,.4)}
+        .adm-save-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+        /* PASSCODE */
+        .passcode-bar{background:#fffbeb;border-bottom:2px solid var(--gold);padding:.75rem 2rem;display:flex;align-items:center;gap:1rem;max-width:100%}
+        .passcode-bar i{color:var(--gold);font-size:1.2rem}
+        .passcode-bar input{flex:1;max-width:340px;padding:.6rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem}
+        .passcode-bar input:focus{outline:none;border-color:var(--gold)}
+        /* LAYOUT */
+        .adm-layout{display:flex;max-width:1400px;margin:0 auto;min-height:calc(100vh - 120px)}
+        /* SIDEBAR */
+        .adm-sidebar{width:220px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:0;height:calc(100vh - 120px);overflow-y:auto}
+        .adm-nav-item{display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;cursor:pointer;font-size:.875rem;font-weight:500;color:var(--muted);transition:all .15s;border-left:3px solid transparent}
+        .adm-nav-item:hover{color:var(--text);background:#f7fafc}
+        .adm-nav-item.active{color:var(--accent);background:#fff5f5;border-left-color:var(--accent);font-weight:600}
+        .adm-nav-item i{width:18px;text-align:center}
+        .adm-nav-divider{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:.75rem 1.5rem .25rem;margin-top:.5rem}
+        /* CONTENT */
+        .adm-content{flex:1;padding:2rem;overflow-y:auto}
+        .adm-panel{display:none}
+        .adm-panel.active{display:block}
+        /* CARDS */
+        .adm-card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:1.75rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+        .adm-card-title{font-size:1.05rem;font-weight:700;color:var(--primary);margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;padding-bottom:.75rem;border-bottom:2px solid var(--bg)}
+        /* FORM */
+        .adm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem}
+        .adm-field{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+        .adm-field label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+        .adm-field input,.adm-field textarea,.adm-field select{padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;transition:border-color .2s;background:#fff}
+        .adm-field input:focus,.adm-field textarea:focus{border-color:var(--accent);outline:none}
+        .adm-field textarea{resize:vertical;min-height:80px}
+        /* TOGGLE */
+        .toggle-wrap{display:flex;align-items:center;gap:.75rem}
+        .toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+        .toggle input{opacity:0;width:0;height:0}
+        .toggle-slider{position:absolute;inset:0;background:#cbd5e0;border-radius:24px;cursor:pointer;transition:.3s}
+        .toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
+        .toggle input:checked+.toggle-slider{background:var(--success)}
+        .toggle input:checked+.toggle-slider:before{transform:translateX(20px)}
+        /* ARTWORK / PROCESS CARDS */
+        .item-card{background:#fafafa;border:1.5px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem;position:relative;transition:border-color .2s}
+        .item-card:hover{border-color:#cbd5e0}
+        .item-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+        .item-card-num{background:var(--primary);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
+        .item-actions{display:flex;gap:.4rem}
+        .ia-btn{width:30px;height:30px;border:none;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s}
+        .ia-btn.up,.ia-btn.dn{background:#ebf8ff;color:#3182ce}
+        .ia-btn.up:hover,.ia-btn.dn:hover{background:#3182ce;color:#fff}
+        .ia-btn.rm{background:#fff5f5;color:#e53e3e}
+        .ia-btn.rm:hover{background:#e53e3e;color:#fff}
+        /* IMAGE */
+        .img-preview{width:120px;height:120px;border-radius:8px;object-fit:cover;border:2px solid var(--border);display:block;margin-top:.5rem}
+        .img-placeholder{width:120px;height:120px;border-radius:8px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem;margin-top:.5rem;text-align:center}
+        /* COLOR */
+        .color-row{display:flex;align-items:center;gap:.75rem}
+        .color-row input[type=color]{width:44px;height:44px;border:2px solid var(--border);border-radius:8px;padding:2px;cursor:pointer}
+        .color-hex{font-size:.85rem;font-weight:600;color:var(--text);font-family:monospace}
+        /* SEO */
+        .seo-page{border-left:4px solid var(--accent);padding:.75rem 1rem;background:#fafafa;border-radius:0 8px 8px 0;margin-bottom:1.25rem}
+        .seo-page-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:.75rem}
+        /* NAV LINKS */
+        .nav-link-row{display:flex;align-items:center;gap:.75rem;padding:.75rem;background:#fafafa;border:1px solid var(--border);border-radius:8px;margin-bottom:.6rem}
+        .nav-link-row span{flex:1;font-size:.9rem;font-weight:500}
+        .nav-link-label{flex:1}
+        .nav-link-label input{width:100%;padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:6px;font-size:.85rem}
+        /* STATUS */
+        #adm-status{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:.8rem 2rem;border-radius:50px;font-weight:600;font-size:.9rem;display:none;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+        #adm-status.success{background:var(--success)}
+        #adm-status.error{background:var(--danger)}
+        /* ADD BTN */
+        .add-btn{width:100%;padding:.85rem;border:2px dashed var(--border);border-radius:10px;background:transparent;color:var(--muted);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+        .add-btn:hover{border-color:var(--accent);color:var(--accent);background:#fff5f5}
     </style>
 </head>
-<body style="padding-top: 2rem;">
-    <div class="container">
-        <h1 class="mb-3">ZinkIntentions Content Manager</h1>
-        
-        <div class="passcode-section">
-            <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Security Authorization</h2>
-            <div class="admin-form-group" style="margin-bottom: 0;">
-                <label>Secret Admin Passcode</label>
-                <input type="password" id="adminSecret" placeholder="Enter passcode to enable saving">
-            </div>
-        </div>
-
-        <!-- General Info -->
-        <div class="admin-section">
-            <h2>General Information</h2>
-            <div class="admin-form-group">
-                <label>Brand Name</label>
-                <input type="text" id="brandName">
-            </div>
-            <div class="admin-form-group">
-                <label>WhatsApp Number</label>
-                <input type="text" id="whatsappNumber">
-            </div>
-            <div class="admin-form-group">
-                <label>Instagram URL</label>
-                <input type="text" id="instagramUrl">
-            </div>
-        </div>
-
-        <!-- About Section -->
-        <div class="admin-section">
-            <h2>About Section</h2>
-            <div class="admin-form-group">
-                <label>Subtitle</label>
-                <input type="text" id="aboutSubtitle">
-            </div>
-            <div class="admin-form-group">
-                <label>Quote</label>
-                <input type="text" id="aboutQuote">
-            </div>
-            <div class="admin-form-group">
-                <label>Description</label>
-                <textarea id="aboutDesc1" rows="3"></textarea>
-            </div>
-            <div class="admin-form-group">
-                <label>About Image</label>
-                <input type="file" accept="image/*" onchange="window.handleSingleImageUpload(event, 'aboutImage')">
-                <input type="hidden" id="aboutImage">
-                <img id="aboutImagePreview" src="" style="max-width: 150px; margin-top: 0.5rem; display: none; border-radius: 4px;">
-            </div>
-        </div>
-
-        <!-- Artworks -->
-        <div class="admin-section">
-            <h2>Artworks</h2>
-            <div id="artworks-list"></div>
-            <button class="btn btn-outline" onclick="window.addArtwork()" style="width: 100%;">+ Add New Artwork</button>
-        </div>
-
-        <div style="text-align: center; margin: 4rem 0;">
-            <button class="btn btn-primary" id="save-btn" onclick="window.saveToFirestore()">Save Changes to Live Site</button>
-        </div>
+<body>
+<header class="adm-header">
+    <div class="adm-header-inner">
+        <div class="adm-logo">Zinkintentions <span>Admin</span></div>
+        <button class="adm-save-btn" id="save-btn" onclick="window.adminSave()">
+            <i class="fas fa-cloud-upload-alt"></i> Push to Live Site
+        </button>
     </div>
+</header>
 
-    <script type="module">
-        import { getSiteConfig, saveSiteConfig } from './js/firebase-config.js';
-        import localConfig from './js/config.js';
+<div class="passcode-bar">
+    <i class="fas fa-lock"></i>
+    <input type="password" id="adminSecret" placeholder="Enter admin passcode to authorize changes">
+    <span style="font-size:.8rem;color:var(--muted)">Required before saving</span>
+</div>
 
-        let siteConfig = localConfig;
+<div class="adm-layout">
+    <!-- SIDEBAR -->
+    <aside class="adm-sidebar">
+        <div class="adm-nav-divider">Content</div>
+        <div class="adm-nav-item active" data-panel="general"><i class="fas fa-globe"></i> General</div>
+        <div class="adm-nav-item" data-panel="hero"><i class="fas fa-home"></i> Homepage</div>
+        <div class="adm-nav-item" data-panel="about"><i class="fas fa-user"></i> About Artist</div>
+        <div class="adm-nav-item" data-panel="portfolio"><i class="fas fa-images"></i> Portfolio</div>
+        <div class="adm-nav-item" data-panel="process"><i class="fas fa-palette"></i> Process</div>
+        <div class="adm-nav-item" data-panel="comingsoon"><i class="fas fa-clock"></i> Coming Soon</div>
+        <div class="adm-nav-divider">Site Settings</div>
+        <div class="adm-nav-item" data-panel="nav"><i class="fas fa-bars"></i> Navigation</div>
+        <div class="adm-nav-item" data-panel="footer"><i class="fas fa-align-center"></i> Footer</div>
+        <div class="adm-nav-item" data-panel="announcement"><i class="fas fa-bullhorn"></i> Banner</div>
+        <div class="adm-nav-item" data-panel="seo"><i class="fas fa-search"></i> SEO / Meta</div>
+        <div class="adm-nav-item" data-panel="theme"><i class="fas fa-paint-brush"></i> Theme</div>
+        <div class="adm-nav-item" data-panel="advanced"><i class="fas fa-code"></i> Advanced</div>
+    </aside>
 
-        async function initAdmin() {
-            const liveConfig = await getSiteConfig();
-            if (liveConfig) siteConfig = liveConfig;
+    <!-- MAIN CONTENT -->
+    <main class="adm-content">
 
-            document.getElementById('brandName').value = siteConfig.brandName || '';
-            document.getElementById('whatsappNumber').value = siteConfig.whatsappNumber || '';
-            document.getElementById('instagramUrl').value = siteConfig.instagramUrl || '';
-            
-            if(siteConfig.about) {
-                document.getElementById('aboutSubtitle').value = siteConfig.about.subtitle || '';
-                document.getElementById('aboutQuote').value = siteConfig.about.quote || '';
-                document.getElementById('aboutDesc1').value = siteConfig.about.description1 || '';
-                document.getElementById('aboutImage').value = siteConfig.about.imageUrl || '';
-                if (siteConfig.about.imageUrl) {
-                    const preview = document.getElementById('aboutImagePreview');
-                    preview.src = siteConfig.about.imageUrl;
-                    preview.style.display = 'block';
-                }
-            }
-            window.renderArtworksEdit();
-        }
+        <!-- GENERAL -->
+        <div class="adm-panel active" id="panel-general">
+            <div class="adm-card">
+                <div class="adm-card-title">Brand & Contact Details</div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>Brand Name</label><input id="brandName" type="text"></div>
+                    <div class="adm-field"><label>Tagline</label><input id="tagline" type="text"></div>
+                    <div class="adm-field"><label>WhatsApp Number (with country code)</label><input id="whatsappNumber" type="text"></div>
+                    <div class="adm-field"><label>WhatsApp Default Message</label><input id="whatsappMessage" type="text"></div>
+                    <div class="adm-field"><label>Instagram URL</label><input id="instagramUrl" type="text"></div>
+                    <div class="adm-field"><label>Email Address</label><input id="email" type="email"></div>
+                    <div class="adm-field"><label>Phone (display)</label><input id="phone" type="text"></div>
+                    <div class="adm-field"><label>Address</label><input id="address" type="text"></div>
+                </div>
+            </div>
+        </div>
 
-        window.renderArtworksEdit = function() {
-            const list = document.getElementById('artworks-list');
-            list.innerHTML = '';
-            (siteConfig.artworks || []).forEach((art, index) => {
-                const card = document.createElement('div');
-                card.className = 'artwork-edit-card';
-                card.innerHTML = `
-                    <div class="remove-btn" onclick="window.removeArtwork(${index})">Remove</div>
-                    <div class="admin-form-group">
-                        <label>Title</label>
-                        <input type="text" value="${art.title}" onchange="window.updateArt(${index}, 'title', this.value)">
+        <!-- HOMEPAGE HERO -->
+        <div class="adm-panel" id="panel-hero">
+            <div class="adm-card">
+                <div class="adm-card-title">Homepage Hero Section</div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>Hero Title</label><input id="heroTitle" type="text"></div>
+                    <div class="adm-field"><label>Hero Subtitle</label><input id="heroSubtitle" type="text"></div>
+                    <div class="adm-field"><label>Button Text</label><input id="heroButtonText" type="text"></div>
+                    <div class="adm-field"><label>Button Link</label><input id="heroButtonLink" type="text"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABOUT -->
+        <div class="adm-panel" id="panel-about">
+            <div class="adm-card">
+                <div class="adm-card-title">About the Artist</div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>Page Title</label><input id="aboutTitle" type="text"></div>
+                    <div class="adm-field"><label>Subtitle</label><input id="aboutSubtitle" type="text"></div>
+                </div>
+                <div class="adm-field"><label>Signature Quote</label><input id="aboutQuote" type="text"></div>
+                <div class="adm-field"><label>Paragraph 1</label><textarea id="aboutDesc1" rows="3"></textarea></div>
+                <div class="adm-field"><label>Paragraph 2</label><textarea id="aboutDesc2" rows="3"></textarea></div>
+                <div class="adm-field"><label>Paragraph 3</label><textarea id="aboutDesc3" rows="3"></textarea></div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>CTA Button Text</label><input id="aboutCtaText" type="text"></div>
+                    <div class="adm-field"><label>CTA Button Link</label><input id="aboutCtaLink" type="text"></div>
+                </div>
+                <div class="adm-field">
+                    <label>Artist Photo</label>
+                    <input type="file" accept="image/*" onchange="window.handleImg(event,'about')">
+                    <img id="aboutImgPreview" class="img-preview" style="display:none">
+                </div>
+            </div>
+        </div>
+
+        <!-- PORTFOLIO -->
+        <div class="adm-panel" id="panel-portfolio">
+            <div class="adm-card">
+                <div class="adm-card-title">Page Labels</div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>Page Title</label><input id="pfPageTitle" type="text"></div>
+                    <div class="adm-field"><label>Page Subtitle</label><input id="pfPageSubtitle" type="text"></div>
+                    <div class="adm-field"><label>"Buy" Button Text</label><input id="pfBuyBtn" type="text"></div>
+                    <div class="adm-field"><label>Instagram Button Text</label><input id="pfInstaBtn" type="text"></div>
+                    <div class="adm-field"><label>"Sold" Label</label><input id="pfSoldLabel" type="text"></div>
+                </div>
+            </div>
+            <div class="adm-card">
+                <div class="adm-card-title">
+                    Artworks
+                    <button class="add-btn" style="width:auto;padding:.5rem 1rem" onclick="window.addArtwork()"><i class="fas fa-plus"></i> Add Artwork</button>
+                </div>
+                <div id="artworks-list"></div>
+            </div>
+        </div>
+
+        <!-- PROCESS -->
+        <div class="adm-panel" id="panel-process">
+            <div class="adm-card">
+                <div class="adm-card-title">Process Page Header</div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>Page Title</label><input id="processTitle" type="text"></div>
+                    <div class="adm-field"><label>Page Subtitle</label><input id="processSubtitle" type="text"></div>
+                </div>
+            </div>
+            <div class="adm-card">
+                <div class="adm-card-title">
+                    Process Steps
+                    <button class="add-btn" style="width:auto;padding:.5rem 1rem" onclick="window.addProcess()"><i class="fas fa-plus"></i> Add Step</button>
+                </div>
+                <div id="process-list"></div>
+            </div>
+        </div>
+
+        <!-- COMING SOON -->
+        <div class="adm-panel" id="panel-comingsoon">
+            <div class="adm-card">
+                <div class="adm-card-title">Coming Soon Page</div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>Title</label><input id="csTitle" type="text"></div>
+                    <div class="adm-field"><label>Badge Text (e.g. "Coming Soon")</label><input id="csBadge" type="text"></div>
+                    <div class="adm-field"><label>Button Text</label><input id="csBtnText" type="text"></div>
+                    <div class="adm-field"><label>Button Link (leave blank for Instagram)</label><input id="csBtnLink" type="text"></div>
+                </div>
+                <div class="adm-field"><label>Subtitle / Description</label><textarea id="csSubtitle" rows="2"></textarea></div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="adm-panel" id="panel-nav">
+            <div class="adm-card">
+                <div class="adm-card-title">Navigation Links — Edit Labels & Toggle Visibility</div>
+                <div id="nav-links-list"></div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="adm-panel" id="panel-footer">
+            <div class="adm-card">
+                <div class="adm-card-title">Footer Content</div>
+                <div class="adm-field"><label>Footer Tagline</label><textarea id="footerTagline" rows="2"></textarea></div>
+                <div class="adm-field"><label>Copyright Text (leave blank to auto-generate)</label><input id="footerCopyright" type="text"></div>
+            </div>
+        </div>
+
+        <!-- ANNOUNCEMENT -->
+        <div class="adm-panel" id="panel-announcement">
+            <div class="adm-card">
+                <div class="adm-card-title">Announcement Banner</div>
+                <div class="adm-field">
+                    <label>Show Banner</label>
+                    <div class="toggle-wrap">
+                        <label class="toggle"><input type="checkbox" id="annEnabled"><span class="toggle-slider"></span></label>
+                        <span id="annEnabledLabel">Off</span>
                     </div>
-                    <div class="admin-form-group">
-                        <label>Price</label>
-                        <input type="text" value="${art.price}" onchange="window.updateArt(${index}, 'price', this.value)">
+                </div>
+                <div class="adm-field"><label>Banner Text</label><input id="annText" type="text"></div>
+                <div class="adm-grid">
+                    <div class="adm-field">
+                        <label>Background Color</label>
+                        <div class="color-row">
+                            <input type="color" id="annBgColor" oninput="document.getElementById('annBgHex').textContent=this.value.toUpperCase()">
+                            <span class="color-hex" id="annBgHex">#d4af37</span>
+                        </div>
                     </div>
-                    <div class="admin-form-group">
-                        <label>Image</label>
-                        <input type="file" accept="image/*" onchange="window.handleArtworkImageUpload(event, ${index})">
-                        <img src="${art.imageUrl}" style="max-width: 150px; margin-top: 0.5rem; display: ${art.imageUrl ? 'block' : 'none'}; border-radius: 4px;">
+                    <div class="adm-field">
+                        <label>Text Color</label>
+                        <div class="color-row">
+                            <input type="color" id="annTextColor" oninput="document.getElementById('annTextHex').textContent=this.value.toUpperCase()">
+                            <span class="color-hex" id="annTextHex">#1a1a1a</span>
+                        </div>
                     </div>
-                `;
-                list.appendChild(card);
-            });
-        };
+                </div>
+            </div>
+        </div>
 
-        window.updateArt = (index, field, value) => { siteConfig.artworks[index][field] = value; };
-        window.removeArtwork = (index) => { siteConfig.artworks.splice(index, 1); window.renderArtworksEdit(); };
-        window.addArtwork = () => { 
-            if(!siteConfig.artworks) siteConfig.artworks = [];
-            siteConfig.artworks.push({ id: Date.now(), title: "New Artwork", price: "₹0", imageUrl: "" });
-            window.renderArtworksEdit(); 
-        };
+        <!-- SEO -->
+        <div class="adm-panel" id="panel-seo">
+            <div class="adm-card">
+                <div class="adm-card-title">SEO — Page Titles & Meta Descriptions</div>
+                <div id="seo-list"></div>
+            </div>
+        </div>
 
-        function compressImage(file, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = event => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX = 800;
-                    let w = img.width, h = img.height;
-                    if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
-                    else { if (h > MAX) { w *= MAX / h; h = MAX; } }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    callback(canvas.toDataURL('image/jpeg', 0.6));
-                }
-            };
-        }
+        <!-- THEME -->
+        <div class="adm-panel" id="panel-theme">
+            <div class="adm-card">
+                <div class="adm-card-title">Visual Theme Colors</div>
+                <div class="adm-grid">
+                    <div class="adm-field"><label>Primary (Dark / Navbar)</label><div class="color-row"><input type="color" id="themePrimary" oninput="document.getElementById('tp').textContent=this.value.toUpperCase()"><span class="color-hex" id="tp">#1a1a1a</span></div></div>
+                    <div class="adm-field"><label>Accent (Gold / Buttons)</label><div class="color-row"><input type="color" id="themeAccent" oninput="document.getElementById('ta').textContent=this.value.toUpperCase()"><span class="color-hex" id="ta">#d4af37</span></div></div>
+                    <div class="adm-field"><label>Surface (Cards / White BG)</label><div class="color-row"><input type="color" id="themeSurface" oninput="document.getElementById('ts').textContent=this.value.toUpperCase()"><span class="color-hex" id="ts">#ffffff</span></div></div>
+                    <div class="adm-field"><label>Main Text Color</label><div class="color-row"><input type="color" id="themeText" oninput="document.getElementById('tt').textContent=this.value.toUpperCase()"><span class="color-hex" id="tt">#333333</span></div></div>
+                </div>
+            </div>
+        </div>
 
-        window.handleSingleImageUpload = (e, id) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            compressImage(file, (base64) => {
-                document.getElementById(id).value = base64;
-                siteConfig.about.imageUrl = base64;
-                const preview = document.getElementById(id + 'Preview');
-                preview.src = base64; preview.style.display = 'block';
-            });
-        };
+        <!-- ADVANCED -->
+        <div class="adm-panel" id="panel-advanced">
+            <div class="adm-card">
+                <div class="adm-card-title">Advanced Code Injection</div>
+                <div class="adm-field">
+                    <label>Custom Head Scripts (e.g. Google Analytics)</label>
+                    <textarea id="customHead" rows="4" placeholder="<script>...</script>"></textarea>
+                </div>
+                <div class="adm-field">
+                    <label>Custom Footer Scripts</label>
+                    <textarea id="customFooter" rows="4" placeholder="<script>...</script>"></textarea>
+                </div>
+                <div class="adm-field">
+                    <label>Custom CSS</label>
+                    <textarea id="customCss" rows="6" placeholder="body { background: ... }"></textarea>
+                </div>
+            </div>
+        </div>
 
-        window.handleArtworkImageUpload = (e, index) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            compressImage(file, (base64) => {
-                siteConfig.artworks[index].imageUrl = base64;
-                window.renderArtworksEdit();
-            });
-        };
+    </main>
+</div>
 
-        window.saveToFirestore = async function() {
-            const passcode = document.getElementById('adminSecret').value;
-            if (!passcode) { alert('Please enter the secret passcode first!'); return; }
+<div id="adm-status"></div>
 
-            const btn = document.getElementById('save-btn');
-            btn.textContent = "Verifying & Saving...";
-            btn.disabled = true;
-
-            try {
-                siteConfig.brandName = document.getElementById('brandName').value;
-                siteConfig.whatsappNumber = document.getElementById('whatsappNumber').value;
-                siteConfig.instagramUrl = document.getElementById('instagramUrl').value;
-                if(!siteConfig.about) siteConfig.about = {};
-                siteConfig.about.subtitle = document.getElementById('aboutSubtitle').value;
-                siteConfig.about.quote = document.getElementById('aboutQuote').value;
-                siteConfig.about.description1 = document.getElementById('aboutDesc1').value;
-
-                // Add the passcode to the data being sent so the rule can verify it
-                siteConfig.adminSecret = passcode;
-
-                const success = await saveSiteConfig(siteConfig);
-                if (success) {
-                    alert('Successfully saved! Your changes are now live.');
-                } else {
-                    alert('Permission Denied. Did you enter the correct passcode? (Or you might be exceeding the 1MB limit).');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('An error occurred.');
-            }
-
-            btn.textContent = "Save Changes to Live Site";
-            btn.disabled = false;
-        };
-
-        initAdmin();
-    </script>
+<script type="module" src="js/admin.js"></script>
+<script>
+    // Sidebar tab switching
+    document.querySelectorAll('.adm-nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.adm-nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.adm-panel').forEach(p => p.classList.remove('active'));
+            item.classList.add('active');
+            document.getElementById('panel-' + item.dataset.panel).classList.add('active');
+        });
+    });
+    // Announcement toggle label
+    document.getElementById('annEnabled').addEventListener('change', function() {
+        document.getElementById('annEnabledLabel').textContent = this.checked ? 'On' : 'Off';
+    });
+</script>
 </body>
 </html>

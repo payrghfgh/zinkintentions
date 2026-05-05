@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paintings | ZinkIntentions</title>
-    <meta name="description" content="New paintings coming soon to ZinkIntentions.">
-    
+    <title>Paintings | Zinkintentions</title>
+    <meta name="description" content="New paintings coming soon to Zinkintentions.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -17,36 +15,34 @@
 
     <div id="navbar-placeholder"></div>
 
-    <!-- Inject custom style specifically for this dark page's navbar -->
     <style>
         .navbar { background-color: rgba(26, 26, 26, 0.95); }
         .nav-brand, .nav-link, .nav-social a, .mobile-menu-btn { color: var(--surface-color); }
         .nav-link::after { background-color: var(--accent-color); }
-        @media (max-width: 768px) {
-            .nav-links { background-color: var(--primary-color); }
-        }
+        @media (max-width: 768px) { .nav-links { background-color: var(--primary-color); } }
     </style>
 
     <main class="hero" style="background: none;">
-        <div class="hero-content">
-            <h1 class="hero-title" style="color: var(--accent-color);">New Collection</h1>
-            <p class="hero-subtitle" style="color: rgba(255,255,255,0.7); margin-bottom: 2rem;">A special series of exclusive paintings is currently in progress.</p>
-            <h2 style="font-family: var(--font-body); font-weight: 300; font-size: 2rem; letter-spacing: 5px; text-transform: uppercase; color: white;">Coming Soon</h2>
-            
+        <div class="hero-content reveal-up" style="transition-delay: 0.2s;">
+            <h1 class="hero-title" id="cs-title" style="color: var(--accent-color);">New Collection</h1>
+            <p class="hero-subtitle" id="cs-subtitle" style="color: rgba(255,255,255,0.7); margin-bottom: 2rem;">A special series of exclusive paintings is currently in progress.</p>
+            <h2 id="cs-badge" style="font-family: var(--font-body); font-weight: 300; font-size: 2rem; letter-spacing: 5px; text-transform: uppercase; color: white;">Coming Soon</h2>
             <div style="margin-top: 4rem;">
-                <a href="https://instagram.com/zinkintentions" target="_blank" class="btn btn-outline" style="color: white; border-color: white;">
+                <a id="cs-btn" href="#" target="_blank" class="btn btn-outline" style="color: white; border-color: white;">
                     Follow for updates <i class="fab fa-instagram" style="margin-left: 8px;"></i>
                 </a>
             </div>
         </div>
     </main>
 
-    <!-- Script to load only navbar and whatsapp for this simple launch page -->
+    <script src="js/config.js"></script>
     <script src="js/components.js"></script>
     <script type="module" src="js/script.js"></script>
     <script>
+        window.siteConfig = window.siteConfig || {};
         loadNavbar('paintings');
         loadWhatsAppWidget();
+        loadAnnouncementBanner();
     </script>
 </body>
 </html>
